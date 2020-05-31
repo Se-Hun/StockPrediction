@@ -1,0 +1,18 @@
+# Ignore Data Folder
+data/
+
+# Ignore .idea Folder
+.idea/
+
+# Ignore .ipynb_checkpoints
+.ipynb_checkpoints/
+
+# Ignore .cache
+.vector_cache/
+
+# Ignore pycache
+__pycache__/
+
+# Output Folder
+output/
+
