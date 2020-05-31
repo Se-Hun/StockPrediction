@@ -52,6 +52,8 @@ def main():
 
     url = get_url(code)
 
+    print("***************** Start Crawling *****************")
+
     count = 0
     while count < target_bundle_num:
         # 1페이지부터 20페이지를 한 묶음(bundle)으로 봄
@@ -59,6 +61,8 @@ def main():
         end_page = count * 20 + 20  # 20 page 까지
 
         for page in range(start_page, end_page+1):
+            print("Current Page : {}".format(page))
+
             time.sleep(random_time()) # => Naver가 Crawling을 막아서 요청을 조금 느리게 해야함..
             page_url = '{url}&page={page}'.format(url=url, page=page)
 
@@ -79,8 +83,12 @@ def main():
     filename = "data_" + str(start_date) + "_" + str(end_date) + ".csv"
     data_save(output_dir, filename, dataset)
 
+    print("***************** Result Report *****************")
+
     print("Start Date : {}".format(start_date))
     print("End Date : {}".format(end_date))
+
+    print("***************** End Crawling *****************")
 
     # print(dataset.head())
 
