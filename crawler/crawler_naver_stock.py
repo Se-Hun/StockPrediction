@@ -37,10 +37,16 @@ def random_time():
     return random.randrange(3, 4) + random.random()
 
 def main():
-    output_dir = "./StockDataSet"
+    if os.path.exists("./StockDataSet"):
+        output_dir = "./StockDataSet"
+    else:
+        os.mkdir("./StockDataSet")
+        output_dir = "./StockDataSet"
 
     code = '005930'  # code for Samsung Electronics
-    target_bundle_num = 2 #200
+    target_bundle_num = 20 #200 -> Hyper Parameter : 이거 수정하면서 몇 개 모을지 결정하면 됨!
+    # total data = target_bundle_num * 20 * 10
+    # 현재 target_bundle_num = 20이므로 total_data = 4000개 -> 4000일 정도의 데이터가 만들어짐(약, 11년 정도?)
 
     dataset = pd.DataFrame()
 
@@ -53,6 +59,7 @@ def main():
         end_page = count * 20 + 20  # 20 page 까지
 
         for page in range(start_page, end_page+1):
+            time.sleep(random_time()) # => Naver가 Crawling을 막아서 요청을 조금 느리게 해야함..
             page_url = '{url}&page={page}'.format(url=url, page=page)
 
             dataset = dataset.append(pd.read_html(page_url, header=0)[0], ignore_index=True)
