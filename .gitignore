@@ -1,5 +1,6 @@
 # Ignore Data Folder
 data/
+crawler/StockDataSet/
 
 # Ignore .idea Folder
 .idea/
