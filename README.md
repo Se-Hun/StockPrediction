@@ -25,12 +25,25 @@ StockDataSet에 수집된 데이터가 .csv 파일의 형태로 만들어진다.
 ## Stock Predictor 훈련 방법
 본 프로젝트에서는 linear regresion, lstm을 활용하여 주식 가격을 예측하도록 하였다.
 
+### 모델 훈련을 위한 Train Data와 Test Data 나누기
+본 프로젝트에서는 가장 최근 2년의 데이터를 Test Data로 설정하고 나머지 데이터를 Train Data로 설정하였다.
+
+우선, Train Data와 Test Data를 나누기 위해서는 "./data"에 크롤링을 통해 수집된 데이터가 .csv 파일 형태로 준비되어 있어야 한다.
+
+다음과 같은 명령어를 통해 Train Data와 Test Data를 얻을 수 있다.
+
+`python build_train_eval.py`
+
+이 명령을 통해 생성되는 파일은 다음과 같다.
+
+* train.csv
+* test.csv
+
 ### 모델 작동을 위한 소프트웨어 환경
 * Software
     - python 3.6 (anaconda recommended)
 * Packages
     - `pip install pandas` OR `conda install pandas`
-    - `pip install lxml`
     - `pip install tqdm` OR `conda install tqdm`
     - `pip install pytorch` OR `conda install pytorch`
     
