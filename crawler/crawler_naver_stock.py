@@ -13,6 +13,8 @@ def preprocess_dataset(dataset):
     # Remove NaN Values
     dataset = dataset.dropna()
 
+    dataset = dataset.rename(columns={'날짜': 'date', '종가': 'close', '전일비': 'diff', '시가': 'open', '고가': 'high', '저가': 'low', '거래량': 'volume'})
+
     # Retype Float -> Int
     dataset[['종가', '전일비', '시가', '고가', '저가', '거래량']] = \
         dataset[['종가', '전일비', '시가', '고가', '저가', '거래량']].astype(int)
