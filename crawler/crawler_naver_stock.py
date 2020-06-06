@@ -16,14 +16,14 @@ def preprocess_dataset(dataset):
     dataset = dataset.rename(columns={'날짜': 'date', '종가': 'close', '전일비': 'diff', '시가': 'open', '고가': 'high', '저가': 'low', '거래량': 'volume'})
 
     # Retype Float -> Int
-    dataset[['종가', '전일비', '시가', '고가', '저가', '거래량']] = \
-        dataset[['종가', '전일비', '시가', '고가', '저가', '거래량']].astype(int)
+    dataset[['close', 'diff', 'open', 'high', 'low', 'volume']] = \
+        dataset[['close', 'diff', 'open', 'high', 'low', 'volume']].astype(int)
 
     # Retype String -> Datetime
-    dataset['날짜'] = pd.to_datetime(dataset['날짜'])
+    dataset['date'] = pd.to_datetime(dataset['date'])
 
-    # Sort in ascending order by 날짜
-    dataset = dataset.sort_values(by=['날짜'], ascending=True)
+    # Sort in ascending order by Date
+    dataset = dataset.sort_values(by=['date'], ascending=True)
 
     # Sort Index For Row
     dataset.index = [ i for i in range(len(dataset.index))]
@@ -76,9 +76,9 @@ def main():
     # preprocessing dataset
     dataset = preprocess_dataset(dataset)
 
-    start_date = dataset['날짜'][0]
+    start_date = dataset['date'][0]
     start_date = str(start_date).split()[0]
-    end_date = dataset['날짜'][len(dataset.index) - 1]
+    end_date = dataset['date'][len(dataset.index) - 1]
     end_date = str(end_date).split()[0]
 
     # DataFrame -> CSV File
