@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-def eval(test_dataset, model, hps, batch_size):
+def eval(test_dataset, model, batch_size):
     # use gpu ?
     device = torch.device("cpu")  # default
     if torch.cuda.is_available(): device = torch.device("cuda")

@@ -128,6 +128,6 @@ def run_eval(input_data, from_model, batch_size):
     # Test DataSet
     test_dataset = TensorDataset(X_test, y_test)
 
-    eval(test_dataset, model, hps, batch_size)
+    eval(test_dataset, model, batch_size)
 
     return None

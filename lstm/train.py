@@ -1,7 +1,7 @@
 from tqdm.auto import tqdm
 
 import torch
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import DataLoader
 
 def train(train_dataset, model, hps, to_model):
     # batch and epoch
