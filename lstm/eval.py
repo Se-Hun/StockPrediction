@@ -1,4 +1,5 @@
 from tqdm.auto import tqdm
+import math
 
 import numpy as np
 
@@ -20,6 +21,7 @@ def eval(test_dataset, model, batch_size):
     # Evaluating !
     model.eval()
     eval_losses = []
+    output_list = []
     for inputs in tqdm(test_dataloader, desc="Evaluation"):
 
         for idx in range(len(inputs)):
@@ -27,13 +29,22 @@ def eval(test_dataset, model, batch_size):
 
         with torch.no_grad():
             x_features = inputs[0]
-            label = inputs[1]
+            labels = inputs[1]
 
             outputs = model(x_features)
-            loss = criterion(outputs, label)
+            # print("------------")
+            # print(outputs)
+            # print("------------")
+            for output in outputs:
+                output_list.append(output.cpu().detach().numpy())
+            # output_list.append(outputs.cpu().detach().numpy())
+
+            loss = criterion(outputs, labels)
 
             eval_losses.append(loss.item())
 
-    mean_loss = np.mean(eval_losses)
+    test_score = math.sqrt(np.mean(eval_losses))
 
-    print("MSE Loss : {}".format(mean_loss))
+    print('Test Score: %.2f RMSE' % (test_score))
+
+    return np.array(output_list)

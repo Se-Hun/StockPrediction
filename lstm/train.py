@@ -21,12 +21,17 @@ def train(train_dataset, model, hps, to_model):
     criterion = torch.nn.MSELoss(reduction='mean')
 
     # optimizer
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+    optimizer = torch.optim.Adam(model.parameters(), lr=hps.learning_rate)
 
     # Train !
     logging_steps = 20
     tr_loss = 0.0
     logging_loss = 0.0
+
+    model.zero_grad()
+
+    # model.hidden = model.init_hidden()
+
     for epoch in range(int(epoch_num)):
         epoch_iterator = tqdm(train_dataloader, desc="Train")
 
@@ -38,6 +43,10 @@ def train(train_dataset, model, hps, to_model):
 
             x_features = inputs[0]
             label = inputs[1]
+
+            model.hidden = model.init_hidden(x_features.size()[1])
+
+            # model.hidden = model.init_hidden()
 
             outputs = model(x_features)
             loss = criterion(outputs, label)

@@ -15,8 +15,10 @@ def main():
                         help="The output_result directory where the model predictions will be written.")
     parser.add_argument("--output_mode", default="regression", type=str,
                         help="classification or regression", required=True)
-    parser.add_argument("--domain", default="close", type=str,
-                        help="close prediction ?") # 1. 종가만 예측 2. 고가-저가로 하루간 변동량 예측
+    parser.add_argument("--domain", default="samsung", type=str,
+                        help="samsung", required=True)
+    parser.add_argument("--target", default="close", type=str,
+                        help="close", required=True) # 1. 종가만 예측 2. 고가-저가로 하루간 변동량 예측
 
     # Other Parameters
     parser.add_argument("--use_gpu", help="use gpu=True or False", default=True)
@@ -68,6 +70,7 @@ def main():
         hps = HParams(
             # domain -------------------------------------------
             domain = args.domain,
+            target = args.target,
 
             # gpu setting ----------------------------------------
             use_gpu = args.use_gpu,

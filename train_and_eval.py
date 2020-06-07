@@ -1,11 +1,30 @@
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+import matplotlib.pyplot as plt
+
 import torch
 from torch.utils.data import TensorDataset
 
-import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-
 from lstm.modeling_lstm import LSTM
 from utils import load_model
+
+def create_window(input, seq_length):
+    data_raw = input.values
+    # data_index = input.index
+    # data_index = data_index[window_size:-1]
+    data = []
+
+    # create all possible sequences of window size
+    for index in range(len(data_raw) - seq_length):
+        data.append(data_raw[index: index + seq_length])
+
+    data = np.array(data)
+
+    x_data = data[:, :-1, :]
+    y_data = data[:, -1, :]
+
+    return x_data, y_data
 
 def run_train(input_data, to_model, hps):
     # data load
@@ -13,40 +32,47 @@ def run_train(input_data, to_model, hps):
 
     # pre-processing
     train_data = train_data.set_index('date')
-    train_data_index = train_data.index
-    column_name = list(train_data)
+    # train_data_index = train_data.index
+    # column_name = list(train_data)
 
-    scaler = MinMaxScaler()
-    train_data = scaler.fit_transform(train_data)
+    # scaler = MinMaxScaler()
+    # train_data = scaler.fit_transform(train_data)
 
-    train_data = pd.DataFrame(train_data, columns=column_name, index=train_data_index)
+    # train_data = pd.DataFrame(train_data, columns=column_name, index=train_data_index)
 
-    # deciding data column for domain
-    if hps.domain == 'close':
-        train_data = pd.DataFrame(train_data, columns=['close'], index=train_data_index)
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    if hps.target == 'close':
+        train_data = train_data[['close']]
+        train_data['close'] = scaler.fit_transform(train_data['close'].values.reshape(-1, 1))
+
+        # train_data = pd.DataFrame(train_data, columns=['close'], index=train_data_index)
 
     # creating window for lstm
     if hps.model_type == 'lstm':
         window_size = hps.window_size
 
-        for s in range(1, window_size+1):
-            train_data['close_{}'.format(s)] = train_data['close'].shift(s)
+        X_train, y_train = create_window(train_data, window_size+1)
 
-        X_train = train_data.dropna().drop('close', axis=1)
-        y_train = train_data.dropna()[['close']]
+        # print(X_train)
 
-        X_train = X_train.values
-
-        y_train = y_train.values
-
-        X_train = X_train.reshape(X_train.shape[0], window_size, 1)
+        # for s in range(1, window_size+1):
+        #     train_data['close_{}'.format(s)] = train_data['close'].shift(s)
+        #
+        # X_train = train_data.dropna().drop('close', axis=1)
+        # y_train = train_data.dropna()[['close']]
+        #
+        # X_train = X_train.values
+        #
+        # y_train = y_train.values
+        #
+        # X_train = X_train.reshape(X_train.shape[0], window_size, 1)
 
         print("------------------ LSTM Data ------------------")
         print("Num Examples : {}".format(X_train.shape[0]))
-        print("Window Size : {}".format(X_train.shape[1]))
+        print("X Train Window Size : {}".format(X_train.shape[1]))
         print("-----------------------------------------------")
 
-        model = LSTM(input_dim=1, hidden_dim=32, output_size=1, num_layer=2, hps=hps)
+        model = LSTM(input_dim=1, hidden_size=32, output_size=1, num_layer=2, hps=hps)
 
     # not implement for another model
     else:
@@ -80,36 +106,20 @@ def run_eval(input_data, from_model, batch_size):
 
     # pre-processing
     test_data = test_data.set_index('date')
-    test_data_index = test_data.index
-    column_name = list(test_data)
-
-    scaler = MinMaxScaler()
-    test_data = scaler.fit_transform(test_data)
-
-    test_data = pd.DataFrame(test_data, columns=column_name, index=test_data_index)
-
-    # deciding data column for domain
-    if hps.domain == 'close':
-        test_data = pd.DataFrame(test_data, columns=['close'], index=test_data_index)
+    scaler = MinMaxScaler(feature_range=(-1, 1))
+    if hps.target == 'close':
+        test_data = test_data[['close']]
+        test_data['close'] = scaler.fit_transform(test_data['close'].values.reshape(-1, 1))
 
     # creating window for lstm
     if hps.model_type == 'lstm':
         window_size = hps.window_size
 
-        for s in range(1, window_size+1):
-            test_data['close_{}'.format(s)] = test_data['close'].shift(s)
-
-        X_test = test_data.dropna().drop('close', axis=1)
-        y_test = test_data.dropna()[['close']]
-
-        X_test = X_test.values
-        y_test = y_test.values
-
-        X_test = X_test.reshape(X_test.shape[0], window_size, 1)
+        X_test, y_test = create_window(test_data, window_size+1)
 
         print("------------------ LSTM Data ------------------")
         print("Num Examples : {}".format(X_test.shape[0]))
-        print("Window Size : {}".format(X_test.shape[1]))
+        print("X Test Window Size : {}".format(X_test.shape[1]))
         print("-----------------------------------------------")
 
     # not implement for another model
@@ -128,6 +138,20 @@ def run_eval(input_data, from_model, batch_size):
     # Test DataSet
     test_dataset = TensorDataset(X_test, y_test)
 
-    eval(test_dataset, model, batch_size)
+    y_preds = eval(test_dataset, model, batch_size)
+    y_test = y_test.detach().numpy()
+
+    y_preds = scaler.inverse_transform(y_preds)
+    y_test = scaler.inverse_transform(y_test)
+
+    result_to_dict = {'label' : [y[0] for y in y_test], 'pred' : [y[0] for y in y_preds]}
+    predict_results = pd.DataFrame(result_to_dict)
+    print(predict_results.head())
+
+    plt.plot(y_test, label="Original")
+    plt.plot(y_preds, label="Predict")
+    plt.legend()
+    plt.show()
+    # print(y_test)
 
     return None
