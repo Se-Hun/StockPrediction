@@ -1,6 +1,7 @@
 import os
 import time
 import random
+import argparse
 
 import pandas as pd
 
@@ -18,6 +19,12 @@ def preprocess_dataset(dataset):
     # Retype Float -> Int
     dataset[['close', 'diff', 'open', 'high', 'low', 'volume']] = \
         dataset[['close', 'diff', 'open', 'high', 'low', 'volume']].astype(int)
+
+    # Remove "diff", "high", "low"
+    dataset.drop(['diff', 'high', 'low'], axis='columns', inplace=True)
+
+    # Remove Redundancy Data
+    dataset = dataset.drop_duplicates(['date'], keep='last')
 
     # Retype String -> Datetime
     dataset['date'] = pd.to_datetime(dataset['date'])
@@ -39,14 +46,24 @@ def random_time():
     return random.randrange(3, 4) + random.random()
 
 def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--code", default="005930", type=str, required=True,
+                        help="target company code for crawling")
+
+    args = parser.parse_args()
+
+
     if os.path.exists("./StockDataSet"):
         output_dir = "./StockDataSet"
     else:
         os.mkdir("./StockDataSet")
         output_dir = "./StockDataSet"
 
-    code = '005930'  # code for Samsung Electronics
-    target_bundle_num = 20 #200 -> Hyper Parameter : 이거 수정하면서 몇 개 모을지 결정하면 됨!
+    code = args.code
+    # code = '091990'  # code for 셀트리온헬스케어
+    # code = '005930'  # code for Samsung Electronics
+    target_bundle_num = 20 #4 # 20
     # total data = target_bundle_num * 20 * 10
     # 현재 target_bundle_num = 20이므로 total_data = 4000개 -> 4000일 정도의 데이터가 만들어짐(약, 11년 정도?)
 
