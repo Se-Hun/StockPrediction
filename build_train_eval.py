@@ -4,10 +4,12 @@ import pandas as pd
 
 def main():
     data_root = "./data"
-    data_path = os.path.join(data_root, "data_2004-04-08_2020-06-05.csv")
+    data_path = os.path.join(data_root, "samsung.csv")
     data = pd.read_csv(data_path)
 
-    split_index = 3507 # 2018-06-05
+    split_index = 3593 # samsung -> 2016-04-27
+    # split_index = 618 # celtrion -> 2020-02-07
+    # split_index = 3507 # 2018-06-05
 
     train_data = data.loc[:split_index]
     test_data = data.loc[split_index+1:]

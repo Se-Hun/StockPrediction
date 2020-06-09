@@ -11,8 +11,6 @@ from utils import load_model
 
 def create_window(input, seq_length):
     data_raw = input.values
-    # data_index = input.index
-    # data_index = data_index[window_size:-1]
     data = []
 
     # create all possible sequences of window size
@@ -40,10 +38,19 @@ def run_train(input_data, to_model, hps):
 
     # train_data = pd.DataFrame(train_data, columns=column_name, index=train_data_index)
 
-    scaler = MinMaxScaler(feature_range=(-1, 1))
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    scaler = MinMaxScaler()
     if hps.target == 'close':
         train_data = train_data[['close']]
         train_data['close'] = scaler.fit_transform(train_data['close'].values.reshape(-1, 1))
+
+    if hps.target == 'open':
+        train_data = train_data[['open']]
+        train_data['open'] = scaler.fit_transform(train_data['open'].values.reshape(-1, 1))
+
+    if hps.target == 'volume':
+        train_data = train_data[['volume']]
+        train_data['volume'] = scaler.fit_transform(train_data['volume'].values.reshape(-1, 1))
 
         # train_data = pd.DataFrame(train_data, columns=['close'], index=train_data_index)
 
@@ -106,10 +113,19 @@ def run_eval(input_data, from_model, batch_size):
 
     # pre-processing
     test_data = test_data.set_index('date')
-    scaler = MinMaxScaler(feature_range=(-1, 1))
+    # scaler = MinMaxScaler(feature_range=(-1, 1))
+    scaler = MinMaxScaler()
     if hps.target == 'close':
         test_data = test_data[['close']]
         test_data['close'] = scaler.fit_transform(test_data['close'].values.reshape(-1, 1))
+
+    if hps.target == 'open':
+        test_data = test_data[['open']]
+        test_data['open'] = scaler.fit_transform(test_data['open'].values.reshape(-1, 1))
+
+    if hps.target == 'volume':
+        test_data = test_data[['volume']]
+        test_data['volume'] = scaler.fit_transform(test_data['volume'].values.reshape(-1, 1))
 
     # creating window for lstm
     if hps.model_type == 'lstm':
@@ -144,9 +160,9 @@ def run_eval(input_data, from_model, batch_size):
     y_preds = scaler.inverse_transform(y_preds)
     y_test = scaler.inverse_transform(y_test)
 
-    result_to_dict = {'label' : [y[0] for y in y_test], 'pred' : [y[0] for y in y_preds]}
-    predict_results = pd.DataFrame(result_to_dict)
-    print(predict_results.head())
+    # result_to_dict = {'label' : [y[0] for y in y_test], 'pred' : [y[0] for y in y_preds]}
+    # predict_results = pd.DataFrame(result_to_dict)
+    # print(predict_results.head())
 
     plt.plot(y_test, label="Original")
     plt.plot(y_preds, label="Predict")
